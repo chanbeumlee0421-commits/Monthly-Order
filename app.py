@@ -5,7 +5,6 @@ from datetime import date, timedelta
 
 st.set_page_config(
     page_title="경보제약 월별 주문 분석",
-    page_icon="💊",
     layout="wide"
 )
 
@@ -16,7 +15,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("💊 경보제약 동물병원 월별 주문 분석")
+st.title("경보제약 동물병원 월별 주문 분석")
 st.caption("Raw 탭 엑셀 파일을 업로드하면 자동으로 분석됩니다.")
 st.divider()
 
@@ -126,7 +125,7 @@ if selected_hospitals:
 fdf = df[mask].copy()
 
 if fdf.empty:
-    st.warning("⚠️ 선택한 조건에 맞는 데이터가 없습니다. 필터를 조정해주세요.")
+    st.warning("⚠️선택한 조건에 맞는 데이터가 없습니다. 필터를 조정해주세요.")
     st.stop()
 
 delta_days = (end_date - start_date).days + 1
@@ -268,7 +267,7 @@ else:
 st.divider()
 
 # ── TOP 20 병원 ──────────────────────────────────────
-st.subheader("🏆 TOP 20 병원 (총 구매수량 기준)")
+st.subheader("TOP 20 병원 (총 구매수량 기준)")
 
 top20 = hosp_agg.nlargest(20, "총수량").copy()
 top20["월평균"] = (top20["총수량"] / months).round(1)
