@@ -33,7 +33,7 @@ def load_data(file):
     df["매출일"] = pd.to_datetime(df["매출일(배송완료일)"], errors="coerce")
     df = df.dropna(subset=["매출일"])
     df["매출수량"] = pd.to_numeric(df["매출수량"], errors="coerce").fillna(0)
-    df["매출액"] = pd.to_numeric(df["매출액(vat 포함)"], errors="coerce").fillna(0)
+    df["매출액"] = pd.to_numeric(df["매출액(vat 제외)"], errors="coerce").fillna(0)
     df["제품명"] = df["제품명"].fillna("기타")
     df["담당자"] = df["담당자"].fillna("미지정")
     return df
