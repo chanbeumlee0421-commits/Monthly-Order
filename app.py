@@ -116,14 +116,26 @@ with st.sidebar:
     available_products = [p for p in all_products if p in available_products_raw]
 
     st.subheader("💊 품목")
-    select_all = st.checkbox("전체 선택", value=True)
+    col_all, col_syringe = st.columns(2)
+    with col_all:
+        select_all = st.checkbox("전체 선택", value=True)
+    with col_syringe:
+        exclude_syringe = st.checkbox("주사기 제외", value=False)
+
+    syringe_keywords = ["syringe", "주사기"]
+    non_syringe = [
+        p for p in available_products
+        if not any(k in p.lower() for k in syringe_keywords)
+    ]
+    base_list = non_syringe if exclude_syringe else available_products
+
     if select_all:
-        selected_products = available_products
+        selected_products = base_list
     else:
         selected_products = st.multiselect(
             "제품명 선택",
-            options=available_products,
-            default=available_products
+            options=base_list,
+            default=base_list
         )
 
 # ── 필터링 ────────────────────────────────────────────
