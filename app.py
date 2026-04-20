@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 st.set_page_config(
     page_title="경보제약 월별 주문 분석",
+    page_icon="💊",
     layout="wide"
 )
 
@@ -15,7 +16,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("경보제약 동물병원 월별 주문 분석")
+st.title("💊 경보제약 동물병원 월별 주문 분석")
 st.caption("Raw 탭 엑셀 파일을 업로드하면 자동으로 분석됩니다.")
 st.divider()
 
@@ -32,7 +33,7 @@ def load_data(file):
     df["매출일"] = pd.to_datetime(df["매출일(배송완료일)"], errors="coerce")
     df = df.dropna(subset=["매출일"])
     df["매출수량"] = pd.to_numeric(df["매출수량"], errors="coerce").fillna(0)
-    df["매출액"] = pd.to_numeric(df["매출액(vat 제외)"], errors="coerce").fillna(0)
+    df["매출액"] = pd.to_numeric(df["매출액(vat 포함)"], errors="coerce").fillna(0)
     df["제품명"] = df["제품명"].fillna("기타")
     df["담당자"] = df["담당자"].fillna("미지정")
     return df
@@ -74,17 +75,14 @@ with st.sidebar:
     st.header("🔍 필터 설정")
 
     st.subheader("📅 주문 기간")
-    col1, col2 = st.columns(2)
-    with col1:
-        start_date = st.date_input("시작일", value=date(2024, 1, 1),
-                                   min_value=min_date, max_value=max_date)
-    with col2:
-        use_today = st.checkbox("종료일 = 오늘", value=False)
-        if use_today:
-            end_date = min(today, max_date)
-        else:
-            end_date = st.date_input("종료일", value=date(2024, 12, 31),
-                                     min_value=min_date, max_value=max_date)
+    start_date = st.date_input("시작일", value=date(2024, 1, 1),
+                               min_value=min_date, max_value=max_date)
+    use_today = st.checkbox("종료일 = 오늘", value=False)
+    if use_today:
+        end_date = min(today, max_date)
+    else:
+        end_date = st.date_input("종료일", value=date(2024, 12, 31),
+                                 min_value=min_date, max_value=max_date)
 
     st.subheader("👤 담당자")
     selected_managers = st.multiselect(
@@ -100,15 +98,24 @@ with st.sidebar:
         placeholder="병원명을 검색하거나 선택하세요..."
     )
 
+    # 담당자/병원 선택에 따라 제품명 동적 필터링
+    filtered_df = df.copy()
+    if selected_managers:
+        filtered_df = filtered_df[filtered_df["담당자"].isin(selected_managers)]
+    if selected_hospitals:
+        filtered_df = filtered_df[filtered_df["거래처명"].isin(selected_hospitals)]
+    available_products_raw = filtered_df["제품명"].dropna().unique().tolist()
+    available_products = [p for p in all_products if p in available_products_raw]
+
     st.subheader("💊 품목")
     select_all = st.checkbox("전체 선택", value=True)
     if select_all:
-        selected_products = all_products
+        selected_products = available_products
     else:
         selected_products = st.multiselect(
             "제품명 선택",
-            options=all_products,
-            default=all_products
+            options=available_products,
+            default=available_products
         )
 
 # ── 필터링 ────────────────────────────────────────────
@@ -125,7 +132,7 @@ if selected_hospitals:
 fdf = df[mask].copy()
 
 if fdf.empty:
-    st.warning("⚠️선택한 조건에 맞는 데이터가 없습니다. 필터를 조정해주세요.")
+    st.warning("⚠️ 선택한 조건에 맞는 데이터가 없습니다. 필터를 조정해주세요.")
     st.stop()
 
 delta_days = (end_date - start_date).days + 1
@@ -267,7 +274,7 @@ else:
 st.divider()
 
 # ── TOP 20 병원 ──────────────────────────────────────
-st.subheader("TOP 20 병원 (총 구매수량 기준)")
+st.subheader("🏆 TOP 20 병원 (총 구매수량 기준)")
 
 top20 = hosp_agg.nlargest(20, "총수량").copy()
 top20["월평균"] = (top20["총수량"] / months).round(1)
