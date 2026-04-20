@@ -16,7 +16,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("💊 경보제약 동물병원 월별 주문 분석")
+st.title("경보제약 동물병원 월별 주문 분석")
 st.caption("Raw 탭 엑셀 파일을 업로드하면 자동으로 분석됩니다.")
 st.divider()
 
@@ -75,14 +75,19 @@ with st.sidebar:
     st.header("🔍 필터 설정")
 
     st.subheader("📅 주문 기간")
-    start_date = st.date_input("시작일", value=date(2024, 1, 1),
-                               min_value=min_date, max_value=max_date)
-    use_today = st.checkbox("종료일 = 오늘", value=False)
-    if use_today:
-        end_date = min(today, max_date)
-    else:
-        end_date = st.date_input("종료일", value=date(2024, 12, 31),
-                                 min_value=min_date, max_value=max_date)
+    d_col1, d_col2, d_col3 = st.columns([5, 5, 3])
+    with d_col1:
+        start_date = st.date_input("시작일", value=date(2024, 1, 1),
+                                   min_value=min_date, max_value=max_date)
+    with d_col3:
+        use_today = st.checkbox("오늘", value=False)
+    with d_col2:
+        if use_today:
+            end_date = min(today, max_date)
+            st.date_input("종료일", value=end_date, disabled=True)
+        else:
+            end_date = st.date_input("종료일", value=date(2024, 12, 31),
+                                     min_value=min_date, max_value=max_date)
 
     st.subheader("👤 담당자")
     selected_managers = st.multiselect(
@@ -98,8 +103,11 @@ with st.sidebar:
         placeholder="병원명을 검색하거나 선택하세요..."
     )
 
-    # 담당자/병원 선택에 따라 제품명 동적 필터링
-    filtered_df = df.copy()
+    # 기간 + 담당자 + 병원 조건 모두 반영해서 실제 거래된 제품만 표시
+    filtered_df = df[
+        (df["매출일"].dt.date >= start_date) &
+        (df["매출일"].dt.date <= end_date)
+    ].copy()
     if selected_managers:
         filtered_df = filtered_df[filtered_df["담당자"].isin(selected_managers)]
     if selected_hospitals:
