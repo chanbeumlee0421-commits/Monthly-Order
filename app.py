@@ -69,12 +69,10 @@ with st.sidebar:
         end_date = st.date_input("종료일", value=date(2024, 12, 31), min_value=min_date, max_value=max_date)
 
     st.subheader("🏥 동물병원")
-    hospital_search = st.text_input("병원명 검색", placeholder="검색어 입력...")
-    filtered_hospitals = [h for h in all_hospitals if hospital_search.lower() in h.lower()] if hospital_search else all_hospitals
     selected_hospitals = st.multiselect(
         "병원 선택 (미선택 시 전체)",
-        options=filtered_hospitals,
-        placeholder="병원을 선택하세요..."
+        options=all_hospitals,
+        placeholder="병원명을 검색하거나 선택하세요..."
     )
 
     st.subheader("💊 품목")
