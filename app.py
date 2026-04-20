@@ -201,7 +201,7 @@ for col in display_pivot.columns:
 styled = (
     display_pivot.style
     .format(fmt2)
-    .applymap(color_cell, subset=[c for c in display_pivot.columns if c not in ["[총구매수량]", "[총구매액]"]])
+    .map(color_cell, subset=[c for c in display_pivot.columns if c not in ["[총구매수량]", "[총구매액]"]])
     .set_properties(**{"text-align": "right", "font-size": "13px"})
     .set_table_styles([
         {"selector": "th", "props": [("background-color", "#f1f3f5"), ("font-weight", "600"), ("font-size", "12px"), ("text-align", "center")]},
